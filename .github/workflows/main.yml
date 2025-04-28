@@ -15,6 +15,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.14.0-alpha.7
+       # Install dependencies   
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -30,15 +31,17 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    # Login to Dockerhub using credentials
     - name: Log in to DockerHub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+    # Build docker image
     - name: Build Docker Image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-flask-app:latest ./app
-
+    # Push an image to private repository
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/devops-flask-app:latest
@@ -50,14 +53,14 @@ jobs:
      steps:
        - name: checkout repository
          uses: actions/checkout@v4
-        # --------- Setup AWS and kubectl ---------
+        # Setup AWS and kubectl
        - name: Configure AWS credentials
          uses: aws-actions/configure-aws-credentials@v3
          with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+        # installing kubectl
        - name: Install kubectl
          run: |
           curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -107,7 +110,7 @@ jobs:
          run: |
           helm install grafana grafana/grafana --namespace monitoring
 
-          # --------- Deploy to Kubernetes ---------
+          #Deploy to Kubernetes
        - name: Deploy Kubernetes manifests
          run: |
           kubectl apply -f k8s/deployment.yaml
