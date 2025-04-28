@@ -28,8 +28,24 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/devops-flask-app:latest
 
+
+    # Set up AWS CLI
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # Configure kubectl to use the EKS cluster
+    - name: Set up kubectl
+      run: |
+        aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+    # Apply Kubernetes manifests
     - name: Deploy to Kubernetes
       run: |
         kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
+
+  
 
