@@ -29,6 +29,7 @@ jobs:
         docker push ${{ secrets.DOCKER_USERNAME }}/devops-flask-app:latest
 
   deploy:
+     needs: build
      runs-on: ubuntu-latest
     # Set up AWS CLI
      steps:
