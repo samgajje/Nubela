@@ -13,6 +13,6 @@ variable "aws_secret_key" {}
 
 variable "key_name" {
   description = "Key pair name for SSH"
-  default     = "your-key-pair"
+  default     = "nubela"
 }
 
