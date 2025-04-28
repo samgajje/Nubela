@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Login to DockerHub
+    - name: Checkout repository
       uses: actions/checkout@v4
     - name: Log in to DockerHub
       uses: docker/login-action@v2
@@ -32,6 +32,8 @@ jobs:
      runs-on: ubuntu-latest
     # Set up AWS CLI
      steps:
+       - name: checkout repository
+         uses: actions/checkout@v4
         # --------- Setup AWS and kubectl ---------
        - name: Configure AWS credentials
          uses: aws-actions/configure-aws-credentials@v3
@@ -53,4 +55,5 @@ jobs:
     # --------- Deploy to Kubernetes ---------
        - name: Deploy Kubernetes manifests
          run: |
-          kubectl apply -f k8s
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
