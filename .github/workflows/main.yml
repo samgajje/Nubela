@@ -32,26 +32,26 @@ jobs:
      runs-on: ubuntu-latest
     # Set up AWS CLI
      steps:
-     - name: Create EKS Cluster
-       run: |
-          aws eks create-cluster \
-            --name ${{ secrets.EKS_CLUSTER_NAME }} \
-            --role-arn ${{ secrets.EKS_ROLE_ARN }} \
-            --resources-vpc-config subnetIds=${{ secrets.SUBNET_IDS }},securityGroupIds=${{ secrets.SG_IDS }} \
-            --region ${{ secrets.AWS_REGION }}
+        # --------- Setup AWS and kubectl ---------
+       - name: Configure AWS credentials
+         uses: aws-actions/configure-aws-credentials@v3
+         with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Step 5: Wait for the EKS Cluster to be created
-     - name: Wait for EKS Cluster to be active
-       run: |
-         aws eks --region ${{ secrets.AWS_REGION }} wait cluster-active --name ${{ secrets.EKS_CLUSTER_NAME }}
+       - name: Install kubectl
+         run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
 
-      # Step 6: Update kubeconfig for kubectl
-     - name: Set up kubectl for EKS
-       run: |
-          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+       - name: Update kubeconfig for EKS
+         run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS.REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
-      # Step 7: Deploy the application to the EKS cluster
-     - name: Deploy to EKS
-       run: |
+    # --------- Deploy to Kubernetes ---------
+       - name: Deploy Kubernetes manifests
+         run: |
           kubectl apply -f k8s/deployment.yaml
-          
+          kubectl apply -f k8s/service.yaml
